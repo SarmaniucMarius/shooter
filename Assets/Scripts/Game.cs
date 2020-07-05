@@ -1,14 +1,17 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+[Serializable]
 public class Game : MonoBehaviour
 {
     public Image gameOverImage;
     public GameObject gameOverUI;
     public GameObject healthBar;
+    public GameObject teleportBar;
 
     public void GameOver()
     {
@@ -16,6 +19,7 @@ public class Game : MonoBehaviour
         StartCoroutine("GameOverFade");
         gameOverUI.SetActive(true);
         healthBar.SetActive(false);
+        teleportBar.SetActive(false);
     }
 
     IEnumerator GameOverFade()

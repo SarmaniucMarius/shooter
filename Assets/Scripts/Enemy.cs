@@ -7,6 +7,8 @@ public class Enemy : MonoBehaviour
 {
     public ParticleSystem deathEffectPrefab;
     public Spawner mySpawner;
+    public AudioClip attackSound;
+    public AudioClip deathSound;
 
     int health = 5;
     Transform target;
@@ -51,20 +53,22 @@ public class Enemy : MonoBehaviour
 
     IEnumerator Attack()
     {
+        AudioManager.Instance.PlaySound(attackSound, transform.position);
+
         material.color = Color.red;
 
         Vector3 enemyPos = transform.position;
         Vector3 movingDirection = (target.position - transform.position).normalized;
         Vector3 playerPos = target.position - movingDirection * playerRadius;
 
-        float attack_speed = 5;
+        float attackSpeed = 5;
         float precent = 0.0f;
         bool hasAppliedDamage = false;
         while (precent <= 1)
         {
             float interpolation = (-precent*precent + precent)*4;
             transform.position = Vector3.Lerp(enemyPos, playerPos, interpolation);
-            precent += Time.deltaTime * attack_speed;
+            precent += Time.deltaTime * attackSpeed;
             if((precent >= 0.5f) && !hasAppliedDamage)
             {
                 hasAppliedDamage = true;
@@ -86,6 +90,8 @@ public class Enemy : MonoBehaviour
     {
         if(--health == 0)
         {
+            AudioManager.Instance.PlaySound(deathSound, transform.position);
+
             ParticleSystem deathEffect = Instantiate(deathEffectPrefab, transform.position, Quaternion.identity);
             // this particle system doesn't use a curve to describe it's lifetime, 
             // so I guess the obsolete proprety can be used...

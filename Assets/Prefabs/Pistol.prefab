@@ -446,3 +446,5 @@ MonoBehaviour:
   flash: {fileID: 1040784786}
   flashTime: 0.05
   shootSound: {fileID: 8300000, guid: 38be0039d459bbf46bdde5fc305dad38, type: 3}
+  reloadTime: 1
+  totalBulletsInMagazine: 15

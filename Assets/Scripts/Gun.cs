@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public abstract class Gun : MonoBehaviour
 {
@@ -14,8 +15,16 @@ public abstract class Gun : MonoBehaviour
     public GameObject flash;
     public float flashTime;
     [NonSerialized]
-    public bool fireTriggerReleased = false;
+    public bool fireTriggerReleased = true;
     public AudioClip shootSound;
+    public float reloadTime;
+    [NonSerialized]
+    public float currentReloadTime;
+    [NonSerialized]
+    public bool isReloading = false;
+    public int totalBulletsInMagazine;
+    [NonSerialized]
+    public int currentBulletsInMagazine;
 
     public abstract void Shoot();
 }

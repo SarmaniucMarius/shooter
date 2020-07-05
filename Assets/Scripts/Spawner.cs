@@ -8,6 +8,7 @@ public class Spawner : MonoBehaviour
     public Enemy enemy;
     public float spawnTime;
     public Transform player;
+    public Transform[] dropPrefabs;
 
     MapGenerator mapGenerator;
     float nextSpawnTime;
@@ -15,6 +16,7 @@ public class Spawner : MonoBehaviour
     [System.NonSerialized]
     public int killedEnemies = 0;
     int spawnedEnemies;
+    string currentDrop = null;
 
     private void Start()
     {
@@ -28,28 +30,32 @@ public class Spawner : MonoBehaviour
             Wave currentWave = waves[currentWaveCount];
             if (killedEnemies == currentWave.enemyCount)
             {
-                if(mapGenerator.maps.Length > ++mapGenerator.currentMap)
+                if(currentDrop == null)
                 {
-                    mapGenerator.GenerateMap();
-                    player.position = new Vector3(0, 1, 0);
+                    currentDrop = Instantiate(dropPrefabs[currentWaveCount]).name;
                 }
-                currentWaveCount++;
-                killedEnemies = 0;
-                spawnedEnemies = 0;
+                if(GameObject.Find(currentDrop) == null)
+                {
+                    currentDrop = null;
+                    if (mapGenerator.maps.Length > ++mapGenerator.currentMap)
+                    {
+                        mapGenerator.GenerateMap();
+                        player.position = new Vector3(0, 1, 0);
+                    }
+                    currentWaveCount++;
+                    killedEnemies = 0;
+                    spawnedEnemies = 0;
+                }
             }
             else
             {
-                if ((Time.time >= nextSpawnTime) && (spawnedEnemies < currentWave.enemyCount))
+                if ((Time.time >= nextSpawnTime) && (spawnedEnemies != currentWave.enemyCount))
                 {
                     StartCoroutine("SpawnEnemy");
                     nextSpawnTime = Time.time + currentWave.enemySpawnTimer;
                     spawnedEnemies++;
                 }
             }
-        }
-        else
-        {
-            print("YOU WON!");
         }
     }
 

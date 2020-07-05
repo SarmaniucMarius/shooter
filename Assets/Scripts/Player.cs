@@ -36,13 +36,19 @@ public class Player : MonoBehaviour
     public HealthBar healthBar;
     public LayerMask collisionMask;
     public ParticleSystem dashEffectPrefab;
-
+    public float teleportCooldown;
+    public Slider teleportBar;
+    public Text bulletAmount;
+    public GameObject reloadingBarGameObject;
+    public Slider reloadingBar;
+    
     Game game;
     Camera viewCamera;
     Rigidbody rigidBody;
     Vector3 velocity;
     int health = 5;
-    bool isDashButtonDown = false;
+    bool isTeleportButtonDown = false;
+    float previousTeleportTime = 0f;
 
     void Start()
     {
@@ -52,6 +58,9 @@ public class Player : MonoBehaviour
         gun = Instantiate(gun, hand.position, hand.rotation);
         gun.transform.parent = hand.transform;
         healthBar.setMaxHealth(health);
+        teleportBar.maxValue = teleportCooldown;
+        reloadingBar.maxValue = gun.reloadTime;
+        reloadingBarGameObject.SetActive(false);
     }
 
     void Update()
@@ -74,6 +83,12 @@ public class Player : MonoBehaviour
             Vector3 point = ray.GetPoint(rayDistance);
             Vector3 correctedLookat = new Vector3(point.x, transform.position.y, point.z);
             transform.LookAt(correctedLookat);
+            // if magnited < 3f the gun will point towards the ground
+            Vector3 distanceBetweenPlayerAndAimPoint = correctedLookat - transform.position;
+            if (distanceBetweenPlayerAndAimPoint.magnitude >= 3f)
+            {
+                hand.LookAt(correctedLookat);
+            }
             crosshair.transform.position = point;
             crosshair.CheckIfEnemyDetected(ray);
         }
@@ -89,30 +104,46 @@ public class Player : MonoBehaviour
         }
         if(Input.GetMouseButtonUp(1))
         {
-            isDashButtonDown = true;
+            isTeleportButtonDown = true;
+        }
+
+        if(teleportBar.value <= teleportBar.maxValue)
+        {
+            teleportBar.value += Time.deltaTime;
+        }
+
+        bulletAmount.text = gun.currentBulletsInMagazine + "/" + gun.totalBulletsInMagazine;
+        
+        if(gun.isReloading)
+        {
+            reloadingBarGameObject.SetActive(true);
+            reloadingBar.value += Time.deltaTime;
+        }
+        else
+        {
+            reloadingBarGameObject.SetActive(false);
+            reloadingBar.value = 0;
         }
     }
 
     void FixedUpdate()
     {
-        if(isDashButtonDown)
+        if(isTeleportButtonDown)
         {
-            ParticleSystem deshEffect = Instantiate(dashEffectPrefab, rigidBody.position, Quaternion.identity);
-            Destroy(deshEffect, deshEffect.main.duration);
-            print(deshEffect.main.duration);
-
-            float dashAmount = 50f;
-            float maxDistance = dashAmount * Time.fixedDeltaTime;
-            Vector3 newPosition = rigidBody.position + velocity * maxDistance;
-            
-            RaycastHit raycastHit;
-            if(Physics.Raycast(rigidBody.position, velocity, out raycastHit, maxDistance, collisionMask))
+            if(Time.time > previousTeleportTime)
             {
-                newPosition = raycastHit.point;
+                ParticleSystem deshEffect = Instantiate(dashEffectPrefab, rigidBody.position, Quaternion.identity);
+                Destroy(deshEffect.gameObject, deshEffect.main.duration);
+
+                float dashAmount = 200f;
+                float maxDistance = dashAmount * Time.fixedDeltaTime;
+                Vector3 newPosition = rigidBody.position + velocity * maxDistance;
+
+                rigidBody.MovePosition(newPosition);
+                previousTeleportTime = Time.time + teleportCooldown;
+                teleportBar.value = 0;
             }
-            
-            rigidBody.MovePosition(newPosition);
-            isDashButtonDown = false;
+            isTeleportButtonDown = false;
         }
         else
         {
@@ -128,5 +159,13 @@ public class Player : MonoBehaviour
             game.GameOver();
         }
         healthBar.setHealthValue(health);
+    }
+
+    public void ChangeGun(Gun newGun)
+    {
+        Destroy(gun.gameObject);
+        gun = Instantiate(newGun, hand.position, hand.rotation);
+        gun.transform.parent = hand.transform;
+        reloadingBar.maxValue = gun.reloadTime;
     }
 }

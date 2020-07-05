@@ -132,3 +132,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   deathEffectPrefab: {fileID: 5612215253844220936, guid: 85dd0664e0277dd47a73848a8534aa82,
     type: 3}
+  mySpawner: {fileID: 0}
+  attackSound: {fileID: 8300000, guid: e8dec5b70b2d57f4bb426aee37d7c239, type: 3}
+  deathSound: {fileID: 8300000, guid: 002e717139c176244b369b61a5b66b60, type: 3}
